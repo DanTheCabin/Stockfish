@@ -48,16 +48,4 @@ vector<Stockfish::Move> DPositionInfoProvider::BestMoves(int numberOfMoves)
     return bestmoves;
 }
 //-----------------------------------
-string DPositionInfoProvider::BestMovesString(int numberOfMoves)
-{
-    string str = "The best " + to_string(numberOfMoves) + " moves are:";
-    vector<Stockfish::Move> bestmoves = BestMoves(numberOfMoves);
-    for (size_t i=0; i < bestmoves.size(); ++i)
-    {
-        Stockfish::Move m = bestmoves[i];
-        str += " " + to_string(i+1) + ". " + Stockfish::UCI::move(m, false);
-    }
-    return str;
-}
-
 } // namespace DSpace

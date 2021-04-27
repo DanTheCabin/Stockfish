@@ -1,5 +1,5 @@
-#ifndef DPIECEINFOPROVIDER_H_INCLUDED
-#define DPIECEINFOPROVIDER_H_INCLUDED
+#ifndef DSQUAREINFOPROVIDER_H_INCLUDED
+#define DSQUAREINFOPROVIDER_H_INCLUDED
 
 
 #include "movegen.h"
@@ -15,23 +15,23 @@ namespace Stockfish {
 
 namespace DSpace {
 
-class DPieceInfoProvider {
+class DSquareInfoProvider {
 
 public:
-  DPieceInfoProvider(Stockfish::Position& position, Stockfish::Square pieceSquare);
+  DSquareInfoProvider(Stockfish::Position& position, Stockfish::Square pieceSquare);
   Stockfish::Position& Position() const;
-  Stockfish::Square PieceSquare() const;
+  Stockfish::Square Square() const;
   Stockfish::Piece Piece() const;
   Stockfish::Color PieceColor() const;
   std::vector<Stockfish::Square> LegalMoves() const;
   std::vector<Stockfish::Square> CaptureMoves() const;
   bool IsPinned(Stockfish::Square& by, Stockfish::Square& to) const;
   Stockfish::Square LeastValuableAttacker() const;
-  bool IsHanging(Stockfish::Square& by) const;
+  bool IsHanging() const;
 
 private:
   Stockfish::Position& m_position;
-  Stockfish::Square m_pieceSquare;
+  Stockfish::Square m_square;
 
   Stockfish::Square ActivePinner(Stockfish::Bitboard snipers) const;
   bool IsPinnedToSquare(Stockfish::Square attackedSq, Stockfish::Square& by, Stockfish::Square& to) const;
@@ -40,4 +40,4 @@ private:
 
 } // namespace DSpace
 
-#endif // #ifndef DPIECEINFOPROVIDER_H_INCLUDED
+#endif // #ifndef DSQUAREINFOPROVIDER_H_INCLUDED

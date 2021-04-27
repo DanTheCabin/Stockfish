@@ -1,5 +1,5 @@
-#ifndef DPIECEINFOFORMATTER_H_INCLUDED
-#define DPIECEINFOFORMATTER_H_INCLUDED
+#ifndef DSQUAREINFOFORMATTER_H_INCLUDED
+#define DSQUAREINFOFORMATTER_H_INCLUDED
 
 
 #include "movegen.h"
@@ -7,7 +7,7 @@
 #include "types.h"
 #include <vector>
 
-class DPieceInfoProvider;
+class DSquareInfoProvider;
 
 namespace Stockfish {
   class Position;
@@ -16,13 +16,13 @@ namespace Stockfish {
 
 namespace DSpace {
 
-class DPieceInfoFormatter {
+class DSquareInfoFormatter {
 
 public:
-  DPieceInfoFormatter(DPieceInfoProvider& provider);
-  DPieceInfoProvider& Provider() const;
+  DSquareInfoFormatter(DSquareInfoProvider& provider);
+  DSquareInfoProvider& Provider() const;
   Stockfish::Position& Position() const;
-  std::string PieceSquareName() const;
+  std::string SquareName() const;
   std::string PieceName() const;
   std::string PieceNameOn(Stockfish::Square sq) const;
   std::string PieceColorName() const;
@@ -32,10 +32,10 @@ public:
   std::string IsHangingString() const;
 
 private:
-  DPieceInfoProvider& m_provider;
+  DSquareInfoProvider& m_provider;
 
 };
 
 } // namespace DSpace
 
-#endif // #ifndef DPIECEINFOFORMATTER_H_INCLUDED
+#endif // #ifndef DSQUAREINFOFORMATTER_H_INCLUDED

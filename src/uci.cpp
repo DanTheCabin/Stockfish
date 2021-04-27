@@ -270,6 +270,7 @@ void UCI::loop(int argc, char* argv[]) {
       else if (token == "go")         go(pos, is, states);
       else if (token == "position")   position(pos, is, states);
       else if (token == "pieceinfo")  DSpace::pieceinfo(pos, is);
+      else if (token == "moveinfo")   DSpace::moveinfo(pos, is, states);
       else if (token == "bestmoves")  DSpace::bestmoves(pos, is, states);
       else if (token == "ucinewgame") Search::clear();
       else if (token == "isready")    sync_cout << "readyok" << sync_endl;

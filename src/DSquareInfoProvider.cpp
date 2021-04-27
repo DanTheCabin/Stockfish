@@ -1,5 +1,5 @@
 #include <iostream>
-#include "DPieceInfoProvider.h"
+#include "DSquareInfoProvider.h"
 #include "position.h"
 #include "bitboard.h"
 #include "movegen.h"
@@ -14,41 +14,37 @@ namespace DSpace {
 const string pieceNames[7] = {"", "pawn", "knight", "bishop", "rook", "queen", "king"};
 
 //-----------------------------------
-DPieceInfoProvider::DPieceInfoProvider(Stockfish::Position& position, Stockfish::Square pieceSquare)
-    : m_position(position), m_pieceSquare(pieceSquare) 
+DSquareInfoProvider::DSquareInfoProvider(Stockfish::Position& position, Stockfish::Square pieceSquare)
+    : m_position(position), m_square(pieceSquare) 
 {
-    if (m_position.piece_on(m_pieceSquare) == Stockfish::NO_PIECE)
-    {
-        throw std::runtime_error("There is no piece on the given square.");
-    }
 }
 //-----------------------------------
-Stockfish::Position& DPieceInfoProvider::Position() const
+Stockfish::Position& DSquareInfoProvider::Position() const
 {
     return m_position;
 }
 //-----------------------------------
-Stockfish::Square DPieceInfoProvider::PieceSquare() const
+Stockfish::Square DSquareInfoProvider::Square() const
 {
-    return m_pieceSquare;
+    return m_square;
 }
 //-----------------------------------
-Stockfish::Color DPieceInfoProvider::PieceColor() const
+Stockfish::Color DSquareInfoProvider::PieceColor() const
 {
     return Stockfish::color_of(Piece());
 }
 //-----------------------------------
-Stockfish::Piece DPieceInfoProvider::Piece() const
+Stockfish::Piece DSquareInfoProvider::Piece() const
 {
-    return Position().piece_on(PieceSquare());
+    return Position().piece_on(Square());
 }
 //-----------------------------------
-vector<Stockfish::Square> DPieceInfoProvider::LegalMoves() const
+vector<Stockfish::Square> DSquareInfoProvider::LegalMoves() const
 {
     vector<Stockfish::Square> moves;
     for (const auto& m : Stockfish::MoveList<Stockfish::LEGAL>(Position()))
     {
-        if (Stockfish::from_sq(m) == PieceSquare())
+        if (Stockfish::from_sq(m) == Square())
         {
             moves.push_back(Stockfish::to_sq(m));
         }
@@ -56,12 +52,12 @@ vector<Stockfish::Square> DPieceInfoProvider::LegalMoves() const
     return moves;
 }
 //-----------------------------------
-vector<Stockfish::Square> DPieceInfoProvider::CaptureMoves() const
+vector<Stockfish::Square> DSquareInfoProvider::CaptureMoves() const
 {
     vector<Stockfish::Square> moves;
     for (const auto& m : Stockfish::MoveList<Stockfish::CAPTURES>(Position()))
     {
-        if (Stockfish::from_sq(m) == PieceSquare())
+        if (Stockfish::from_sq(m) == Square())
         {
             if (Position().legal(m)) // Need to make sure we're not moving out of a king pin or that our king is already in check
             {
@@ -72,7 +68,7 @@ vector<Stockfish::Square> DPieceInfoProvider::CaptureMoves() const
     return moves;
 }
 //-----------------------------------
-Stockfish::Square DPieceInfoProvider::ActivePinner(Stockfish::Bitboard snipers) const
+Stockfish::Square DSquareInfoProvider::ActivePinner(Stockfish::Bitboard snipers) const
 {
     Stockfish::Square sniperSq = Stockfish::SQ_NONE;
     assert(snipers);
@@ -80,14 +76,14 @@ Stockfish::Square DPieceInfoProvider::ActivePinner(Stockfish::Bitboard snipers) 
     {
         sniperSq = Stockfish::pop_lsb(snipers);
     }
-    while (!Position().legal(make_move(sniperSq, PieceSquare())));
+    while (!Position().legal(make_move(sniperSq, Square())));
     return sniperSq;
 }
 //-----------------------------------
-bool DPieceInfoProvider::IsPinnedToSquare(Stockfish::Square attackedSq, Stockfish::Square& by, Stockfish::Square& to) const
+bool DSquareInfoProvider::IsPinnedToSquare(Stockfish::Square attackedSq, Stockfish::Square& by, Stockfish::Square& to) const
 {
     bool isPinned = false;
-    Stockfish::Square pinnedSq = PieceSquare();
+    Stockfish::Square pinnedSq = Square();
     Stockfish::Position& pos = Position();
     Stockfish::Color pieceColor = Stockfish::color_of(pos.piece_on(pinnedSq));
     Stockfish::Bitboard pinners = 0;
@@ -121,7 +117,7 @@ bool DPieceInfoProvider::IsPinnedToSquare(Stockfish::Square attackedSq, Stockfis
     return isPinned;
 }
 //-----------------------------------
-bool DPieceInfoProvider::IsPinned(Stockfish::Square& by, Stockfish::Square& to) const
+bool DSquareInfoProvider::IsPinned(Stockfish::Square& by, Stockfish::Square& to) const
 {
     bool isPinned = false;
     Stockfish::Square sq = Stockfish::SQ_A1;
@@ -133,49 +129,53 @@ bool DPieceInfoProvider::IsPinned(Stockfish::Square& by, Stockfish::Square& to) 
     return isPinned;
 }
 //-----------------------------------
-Stockfish::Square DPieceInfoProvider::LeastValuableAttacker() const
+Stockfish::Square DSquareInfoProvider::LeastValuableAttacker() const
 {
     Stockfish::Square lva = Stockfish::SQ_NONE;
-    Stockfish::Bitboard attackers = Position().attackers_to(PieceSquare()) &
-        Position().pieces(~PieceColor());
-    if (attackers)
+    if (Piece() != Stockfish::NO_PIECE)
     {
-        Stockfish::Bitboard bb;
-        if ((bb = (attackers & Position().pieces(Stockfish::PAWN))))
+        Stockfish::Bitboard attackers = Position().attackers_to(Square()) &
+        Position().pieces(~PieceColor());
+        if (attackers)
         {
-            lva = Stockfish::pop_lsb(bb);
-        }
-        else if ((bb = (attackers & Position().pieces(Stockfish::KNIGHT))))
-        {
-            lva = Stockfish::pop_lsb(bb);
-        }
-        else if ((bb = (attackers & Position().pieces(Stockfish::BISHOP))))
-        {
-            lva = Stockfish::pop_lsb(bb);
-        }
-        else if ((bb = (attackers & Position().pieces(Stockfish::ROOK))))
-        {
-            lva = Stockfish::pop_lsb(bb);
-        }
-        else if ((bb = (attackers & Position().pieces(Stockfish::QUEEN))))
-        {
-            lva = Stockfish::pop_lsb(bb);
-        }
-        else
-        {
-            lva = Position().square<Stockfish::KING>(~PieceColor());
+            Stockfish::Bitboard bb;
+            if ((bb = (attackers & Position().pieces(Stockfish::PAWN))))
+            {
+                lva = Stockfish::pop_lsb(bb);
+            }
+            else if ((bb = (attackers & Position().pieces(Stockfish::KNIGHT))))
+            {
+                lva = Stockfish::pop_lsb(bb);
+            }
+            else if ((bb = (attackers & Position().pieces(Stockfish::BISHOP))))
+            {
+                lva = Stockfish::pop_lsb(bb);
+            }
+            else if ((bb = (attackers & Position().pieces(Stockfish::ROOK))))
+            {
+                lva = Stockfish::pop_lsb(bb);
+            }
+            else if ((bb = (attackers & Position().pieces(Stockfish::QUEEN))))
+            {
+                lva = Stockfish::pop_lsb(bb);
+            }
+            else
+            {
+                lva = Position().square<Stockfish::KING>(~PieceColor());
+            }
         }
     }
+    
     return lva;
 }
 //-----------------------------------
-bool DPieceInfoProvider::IsHanging(Stockfish::Square& leastValuableAttacker) const
+bool DSquareInfoProvider::IsHanging() const
 {
     bool isHanging = false;
-    leastValuableAttacker = LeastValuableAttacker();
+    Stockfish::Square leastValuableAttacker = LeastValuableAttacker();
     if (leastValuableAttacker != Stockfish::SQ_NONE)
     {
-        isHanging = Position().see_ge(make_move(leastValuableAttacker, PieceSquare()), Stockfish::Value(1));
+        isHanging = Position().see_ge(make_move(leastValuableAttacker, Square()), Stockfish::Value(1));
     }
     return isHanging;
 }

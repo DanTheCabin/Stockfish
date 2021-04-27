@@ -22,7 +22,6 @@ public:
   Stockfish::Position& Position() const;
   Stockfish::StateListPtr& States() const;
   std::vector<Stockfish::Move> BestMoves(int numberOfMoves);
-  std::string BestMovesString(int numberOfMoves);
   
 private:
   Stockfish::Position& m_position;

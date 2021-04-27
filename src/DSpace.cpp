@@ -1,9 +1,11 @@
 #include <iostream>
 #include "DSpace.h"
-#include "DPieceInfoProvider.h"
-#include "DPieceInfoFormatter.h"
+#include "DSquareInfoProvider.h"
+#include "DSquareInfoFormatter.h"
 #include "DPositionInfoProvider.h"
+#include "DPositionInfoFormatter.h"
 #include "DMoveInfoProvider.h"
+#include "DMoveInfoFormatter.h"
 #include "position.h"
 #include "movegen.h"
 #include "types.h"
@@ -32,7 +34,8 @@ void bestmoves(Stockfish::Position& pos, istringstream& is, Stockfish::StateList
     }
 
     Stockfish::Options["MultiPV"] = to_string(numberOfMoves);
-    DPositionInfoProvider positionInfo = DPositionInfoProvider(pos, states);
+    DPositionInfoProvider provider = DPositionInfoProvider(pos, states);
+    DPositionInfoFormatter positionInfo = DPositionInfoFormatter(provider);
     cout << positionInfo.BestMovesString(numberOfMoves) << endl;
 }
 //-----------------------------------
@@ -40,31 +43,37 @@ void pieceinfo(Stockfish::Position& pos, istringstream& is)
 {
     string token;
     is >> token;
-    Stockfish::Square pieceSquare = to_square(token);
-    try
+    Stockfish::Square square = to_square(token);
+    if (pos.piece_on(square) != Stockfish::NO_PIECE)
     {
-        DPieceInfoProvider provider = DPieceInfoProvider(pos, pieceSquare);
-        DPieceInfoFormatter pieceInfo = DPieceInfoFormatter(provider);
+        DSquareInfoProvider provider = DSquareInfoProvider(pos, square);
+        DSquareInfoFormatter pieceInfo = DSquareInfoFormatter(provider);
         cout << pieceInfo.LegalMovesString() << endl;
         cout << pieceInfo.CaptureMovesString() << endl;
         cout << pieceInfo.IsPinnedString() << endl;
         cout << pieceInfo.IsHangingString() << endl;        
     }
-    catch (const std::runtime_error& e)
+    else 
     {
-        cout << e.what() << endl;
+        cout << "There is no piece on that square." << endl;
     }
 }
 //-----------------------------------
-void moveinfo(Stockfish::Position& pos, istringstream& is)
+void moveinfo(Stockfish::Position& pos, istringstream& is, Stockfish::StateListPtr& states)
 {
     string token;
     is >> token;
+    string off = "Off";
+    Stockfish::Options["Analysis Contempt"] = off;
     Stockfish::Move move = Stockfish::UCI::to_move(pos, token);
     if (move != Stockfish::MOVE_NONE)
     {
-        DMoveInfoProvider moveInfo = DMoveInfoProvider(pos, move);
-        cout << moveInfo.IsSEEPositiveCapture() << endl;
+        DSquareInfoProvider toSquareProvider = DSquareInfoProvider(pos, Stockfish::to_sq(move));
+        DMoveInfoProvider provider = DMoveInfoProvider(pos, move, states, toSquareProvider);
+        DMoveInfoFormatter moveInfo = DMoveInfoFormatter(provider);
+        cout << moveInfo.CentipawnChangeString() << endl;
+        cout << moveInfo.IsSEEPositiveCaptureString() << endl;
+        cout << moveInfo.CapturesHangingPieceString() << endl;
     }
     else
     {

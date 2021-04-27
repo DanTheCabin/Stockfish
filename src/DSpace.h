@@ -15,6 +15,7 @@ namespace Stockfish {
 namespace DSpace {
 	Stockfish::Square to_square(std::string sqStr);	
 	void pieceinfo(Stockfish::Position& pos, std::istringstream& is);
+	void moveinfo(Stockfish::Position& pos, std::istringstream& is, Stockfish::StateListPtr& states);
 	void bestmoves(Stockfish::Position& pos, std::istringstream& is, Stockfish::StateListPtr& states);
 	}
 

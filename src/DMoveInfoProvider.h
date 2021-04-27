@@ -15,19 +15,31 @@ namespace Stockfish {
 
 namespace DSpace {
 
+class DSquareInfoProvider;
+
 class DMoveInfoProvider {
 
 public:
-  DMoveInfoProvider(Stockfish::Position& position, Stockfish::Move move);
-  bool IsCapture() const;
-  bool IsSEEPositiveCapture() const;
+  DMoveInfoProvider(
+  	Stockfish::Position& position, 
+  	Stockfish::Move move, 
+  	Stockfish::StateListPtr& states,
+  	DSquareInfoProvider& toProvider
+  );
   Stockfish::Position& Position() const;
   Stockfish::Move Move() const;
+  Stockfish::StateListPtr& States() const;
+  DSquareInfoProvider ToSquare() const;
+  double CentipawnChange() const;
+  bool IsCapture() const;
+  bool IsSEEPositiveCapture() const;
+  bool CapturesHangingPiece() const;
   
 private:
   Stockfish::Position& m_position;
   Stockfish::Move m_move;
-
+  Stockfish::StateListPtr& m_states;
+  DSquareInfoProvider& m_toProvider;
 
 };
 

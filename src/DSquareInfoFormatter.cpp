@@ -1,6 +1,6 @@
 #include <iostream>
-#include "DPieceInfoProvider.h"
-#include "DPieceInfoFormatter.h"
+#include "DSquareInfoProvider.h"
+#include "DSquareInfoFormatter.h"
 #include "position.h"
 #include "bitboard.h"
 #include "movegen.h"
@@ -15,47 +15,47 @@ namespace DSpace {
 const string pieceNames[7] = {"", "pawn", "knight", "bishop", "rook", "queen", "king"};
 
 //-----------------------------------
-DPieceInfoFormatter::DPieceInfoFormatter(DPieceInfoProvider& provider)
+DSquareInfoFormatter::DSquareInfoFormatter(DSquareInfoProvider& provider)
     : m_provider(provider)
 {
 }
 //-----------------------------------
-DPieceInfoProvider& DPieceInfoFormatter::Provider() const
+DSquareInfoProvider& DSquareInfoFormatter::Provider() const
 {
     return m_provider;
 }
 //-----------------------------------
-Stockfish::Position& DPieceInfoFormatter::Position() const
+Stockfish::Position& DSquareInfoFormatter::Position() const
 {
     return Provider().Position();
 }
 //-----------------------------------
-string DPieceInfoFormatter::PieceSquareName() const
+string DSquareInfoFormatter::SquareName() const
 {
-    return Stockfish::UCI::square(Provider().PieceSquare());
+    return Stockfish::UCI::square(Provider().Square());
 }
 //-----------------------------------
-string DPieceInfoFormatter::PieceNameOn(Stockfish::Square sq) const
+string DSquareInfoFormatter::PieceNameOn(Stockfish::Square sq) const
 {
     return pieceNames[type_of(Position().piece_on(sq))];
 }
 //-----------------------------------
-string DPieceInfoFormatter::PieceName() const
+string DSquareInfoFormatter::PieceName() const
 {
-    return PieceNameOn(Provider().PieceSquare());
+    return PieceNameOn(Provider().Square());
 }
 //-----------------------------------
-string DPieceInfoFormatter::PieceColorName() const
+string DSquareInfoFormatter::PieceColorName() const
 {
     return Provider().PieceColor() == Stockfish::WHITE ? "white" : "black";
 }
 //-----------------------------------
-string DPieceInfoFormatter::LegalMovesString() const
+string DSquareInfoFormatter::LegalMovesString() const
 {
     string str;
     if (Provider().PieceColor() != Position().side_to_move())
     {
-        str = "The " + PieceColorName() + " " + PieceName() + " on " + PieceSquareName() + 
+        str = "The " + PieceColorName() + " " + PieceName() + " on " + SquareName() + 
             " has no legal moves since it is not " + PieceColorName() + "'s turn to move.";
     }
     else
@@ -68,22 +68,22 @@ string DPieceInfoFormatter::LegalMovesString() const
         str = str.substr(0, str.size()-2); // Remove trailing comma
         if (str.size())
         {
-            str = "There are " + to_string(moves.size()) + " legal move(s) for the " + PieceName() + " on " + PieceSquareName() + ": " + str + ".";
+            str = "There are " + to_string(moves.size()) + " legal move(s) for the " + PieceName() + " on " + SquareName() + ": " + str + ".";
         }
         else
         {
-            str = "There are no legal moves for the " + PieceName() + " on " + PieceSquareName() + ".";
+            str = "There are no legal moves for the " + PieceName() + " on " + SquareName() + ".";
         }
     }
     return str;
 }
 //-----------------------------------
-string DPieceInfoFormatter::CaptureMovesString() const
+string DSquareInfoFormatter::CaptureMovesString() const
 {
     string str;
     if (Provider().PieceColor() != Position().side_to_move())
     {
-        str = "The " + PieceColorName() + " " + PieceName() + " on " + PieceSquareName() + 
+        str = "The " + PieceColorName() + " " + PieceName() + " on " + SquareName() + 
             " has no capture moves since it is not " + PieceColorName() + "'s turn to move.";
     }
     else
@@ -96,19 +96,19 @@ string DPieceInfoFormatter::CaptureMovesString() const
         str = str.substr(0, str.size()-2); // Remove trailing comma
         if (str.size())
         {
-            str = "The " + PieceName() + " on " + PieceSquareName() + " can make " + to_string(moves.size()) + " capture(s): " + str + ".";
+            str = "The " + PieceName() + " on " + SquareName() + " can make " + to_string(moves.size()) + " capture(s): " + str + ".";
         }
         else
         {
-            str = "The " + PieceName() + " on " + PieceSquareName() + " cannot capture any pieces.";
+            str = "The " + PieceName() + " on " + SquareName() + " cannot capture any pieces.";
         }
     }
     return str;
 }
 //-----------------------------------
-string DPieceInfoFormatter::IsPinnedString() const
+string DSquareInfoFormatter::IsPinnedString() const
 {
-    string str = "The " + PieceName() + " on " + PieceSquareName();
+    string str = "The " + PieceName() + " on " + SquareName();
     Stockfish::Square by = Stockfish::SQ_NONE;
     Stockfish::Square to = Stockfish::SQ_NONE;
     bool isPinned = Provider().IsPinned(by, to);
@@ -128,13 +128,14 @@ string DPieceInfoFormatter::IsPinnedString() const
     return str;
 }
 //-----------------------------------
-string DPieceInfoFormatter::IsHangingString() const
+string DSquareInfoFormatter::IsHangingString() const
 {
-    string str = "The " + PieceName() + " on " + PieceSquareName();
-    Stockfish::Square leastValuableAttacker = Stockfish::SQ_NONE;
-    bool isHanging = Provider().IsHanging(leastValuableAttacker);
+    string str = "The " + PieceName() + " on " + SquareName();
+    
+    bool isHanging = Provider().IsHanging();
     if (isHanging)
     {
+        Stockfish::Square leastValuableAttacker = Provider().LeastValuableAttacker();
         string attackerPieceStr = PieceNameOn(leastValuableAttacker);
         string attackerSquareStr = Stockfish::UCI::square(leastValuableAttacker);
         str += " is hanging as it can be SEE-negatively caputred by the " + 
