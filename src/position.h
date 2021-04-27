@@ -172,6 +172,9 @@ public:
   // Used by NNUE
   StateInfo* state() const;
 
+  void put_piece(Piece pc, Square s);
+  void remove_piece(Square s);
+
 private:
   // Initialization helpers (used while setting up a position)
   void set_castling_right(Color c, Square rfrom);
@@ -179,8 +182,6 @@ private:
   void set_check_info(StateInfo* si) const;
 
   // Other helpers
-  void put_piece(Piece pc, Square s);
-  void remove_piece(Square s);
   void move_piece(Square from, Square to);
   template<bool Do>
   void do_castling(Color us, Square from, Square& to, Square& rfrom, Square& rto);

@@ -5,18 +5,17 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include "bitboard.h"
 
 namespace Stockfish {
-
-class Position;
-enum Square : int;
+  class Position;
+  enum Square : int;
+}
 
 namespace DSpace {
-	void pieceinfo(Position& pos, std::istringstream& is);
-	Square to_square(std::string sqStr);
-
+	void pieceinfo(Stockfish::Position& pos, std::istringstream& is);
+	Stockfish::Square to_square(std::string sqStr);
 }
 
-}
 
 #endif // #ifndef DSPACE_H_INCLUDED

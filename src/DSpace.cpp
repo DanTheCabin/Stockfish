@@ -9,36 +9,42 @@
 
 using namespace std;
 
-namespace Stockfish {
-
 namespace DSpace {
 //-----------------------------------
-void pieceinfo(Position& pos, istringstream& is)
+void pieceinfo(Stockfish::Position& pos, istringstream& is)
 {
     string token;
     is >> token;
-    Square pieceSquare = to_square(token);
+    Stockfish::Square pieceSquare = to_square(token);
     try
     {
         DPieceInfoProvider pieceInfo = DPieceInfoProvider(pos, pieceSquare);
         cout << pieceInfo.LegalMovesString() << endl;
         cout << pieceInfo.CaptureMovesString() << endl;
+        cout << pieceInfo.IsPinnedString() << endl;
     }
-    catch (const invalid_argument& e)
+    catch (const std::runtime_error& e)
     {
         cout << e.what() << endl;
     }
 }
 //-----------------------------------
-Square to_square(string sqStr)
+// Helper function that would actually belong in uci.cpp where "to_move" is a related function, but I put it here for separation
+Stockfish::Square to_square(string sqStr)
 {
-    Square sq = SQ_NONE;
-    for (sq = SQ_A1; sq != SQ_NONE; sq=(Square)(sq+1))
-      if (sqStr == UCI::square(sq))
-        return sq;
+    Stockfish::Square sq = Stockfish::SQ_NONE;
+    for (Stockfish::Square sqi = Stockfish::SQ_A1; sqi <= Stockfish::SQ_H8; ++sqi)
+    {
+        if (sqStr == Stockfish::UCI::square(sqi))
+        {
+            sq = sqi;
+            break;
+        }
+    }
     return sq;
 }
 //-----------------------------------
-}
+/// 
 
-} // namespace Stockfish
+}
+ // namespace DSpace
