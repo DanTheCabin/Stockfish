@@ -19,7 +19,7 @@ DPieceInfoProvider::DPieceInfoProvider(Stockfish::Position& position, Stockfish:
 {
     if (m_position.piece_on(m_pieceSquare) == Stockfish::NO_PIECE)
     {
-        throw std::runtime_error("There is no piece on " + PieceSquareName());
+        throw std::runtime_error("There is no piece on the given square.");
     }
 }
 //-----------------------------------
@@ -33,11 +33,6 @@ Stockfish::Square DPieceInfoProvider::PieceSquare() const
     return m_pieceSquare;
 }
 //-----------------------------------
-string DPieceInfoProvider::PieceSquareName() const
-{
-    return Stockfish::UCI::square(m_pieceSquare);
-}
-//-----------------------------------
 Stockfish::Color DPieceInfoProvider::PieceColor() const
 {
     return Stockfish::color_of(Piece());
@@ -46,16 +41,6 @@ Stockfish::Color DPieceInfoProvider::PieceColor() const
 Stockfish::Piece DPieceInfoProvider::Piece() const
 {
     return Position().piece_on(PieceSquare());
-}
-//-----------------------------------
-string DPieceInfoProvider::PieceNameOn(Stockfish::Square sq) const
-{
-    return pieceNames[type_of(Position().piece_on(sq))];
-}
-//-----------------------------------
-string DPieceInfoProvider::PieceName() const
-{
-    return PieceNameOn(PieceSquare());
 }
 //-----------------------------------
 vector<Stockfish::Square> DPieceInfoProvider::LegalMoves() const
@@ -69,35 +54,6 @@ vector<Stockfish::Square> DPieceInfoProvider::LegalMoves() const
         }
     }
     return moves;
-}
-//-----------------------------------
-string DPieceInfoProvider::LegalMovesString() const
-{
-    string str;
-    if (PieceColor() != Position().side_to_move())
-    {
-        string colorStr = PieceColor() == Stockfish::WHITE ? "white" : "black"; 
-        str = "The " + colorStr + " " + PieceName() + " on " + PieceSquareName() + 
-            " has no legal moves since it is not " + colorStr + "'s turn to move.";
-    }
-    else
-    {
-        vector<Stockfish::Square> moves = LegalMoves();
-        for (auto to : moves)
-        {
-            str += Stockfish::UCI::square(to) + ", ";
-        }
-        str = str.substr(0, str.size()-2); // Remove trailing comma
-        if (str.size())
-        {
-            str = "There are " + to_string(moves.size()) + " legal move(s) for the " + PieceName() + " on " + PieceSquareName() + ": " + str + ".";
-        }
-        else
-        {
-            str = "There are no legal moves for the " + PieceName() + " on " + PieceSquareName() + ".";
-        }
-    }
-    return str;
 }
 //-----------------------------------
 vector<Stockfish::Square> DPieceInfoProvider::CaptureMoves() const
@@ -114,35 +70,6 @@ vector<Stockfish::Square> DPieceInfoProvider::CaptureMoves() const
         }
     }
     return moves;
-}
-//-----------------------------------
-string DPieceInfoProvider::CaptureMovesString() const
-{
-    string str;
-    if (PieceColor() != Position().side_to_move())
-    {
-        string colorStr = PieceColor() == Stockfish::WHITE ? "white" : "black"; 
-        str = "The " + colorStr + " " + PieceName() + " on " + PieceSquareName() + 
-            " has no capture moves since it is not " + colorStr + "'s turn to move.";
-    }
-    else
-    {
-        vector<Stockfish::Square> moves = CaptureMoves();
-        for (auto to : moves)
-        {
-            str += Stockfish::UCI::square(to) + ", ";
-        }
-        str = str.substr(0, str.size()-2); // Remove trailing comma
-        if (str.size())
-        {
-            str = "The " + PieceName() + " on " + PieceSquareName() + " can make " + to_string(moves.size()) + " capture(s): " + str + ".";
-        }
-        else
-        {
-            str = "The " + PieceName() + " on " + PieceSquareName() + " cannot capture any pieces.";
-        }
-    }
-    return str;
 }
 //-----------------------------------
 Stockfish::Square DPieceInfoProvider::ActivePinner(Stockfish::Bitboard snipers) const
@@ -206,28 +133,6 @@ bool DPieceInfoProvider::IsPinned(Stockfish::Square& by, Stockfish::Square& to) 
     return isPinned;
 }
 //-----------------------------------
-string DPieceInfoProvider::IsPinnedString() const
-{
-    string str = "The " + PieceName() + " on " + PieceSquareName();
-    Stockfish::Square by = Stockfish::SQ_NONE;
-    Stockfish::Square to = Stockfish::SQ_NONE;
-    bool isPinned = IsPinned(by, to);
-    if (isPinned)
-    {
-        string toPieceStr = PieceNameOn(to);
-        string byPieceStr = PieceNameOn(by);
-        string toSquareStr = Stockfish::UCI::square(to);
-        string bySquareStr = Stockfish::UCI::square(by);
-        str += " is pinned to the " + 
-            toPieceStr + " on " + toSquareStr + " by the " + byPieceStr + " on " + bySquareStr + ".";
-    }
-    else
-    {
-        str += " is not pinned.";
-    }
-    return str;
-}
-//-----------------------------------
 Stockfish::Square DPieceInfoProvider::LeastValuableAttacker() const
 {
     Stockfish::Square lva = Stockfish::SQ_NONE;
@@ -273,25 +178,6 @@ bool DPieceInfoProvider::IsHanging(Stockfish::Square& leastValuableAttacker) con
         isHanging = Position().see_ge(make_move(leastValuableAttacker, PieceSquare()), Stockfish::Value(1));
     }
     return isHanging;
-}
-//-----------------------------------
-string DPieceInfoProvider::IsHangingString() const
-{
-    string str = "The " + PieceName() + " on " + PieceSquareName();
-    Stockfish::Square leastValuableAttacker = Stockfish::SQ_NONE;
-    bool isHanging = IsHanging(leastValuableAttacker);
-    if (isHanging)
-    {
-        string attackerPieceStr = PieceNameOn(leastValuableAttacker);
-        string attackerSquareStr = Stockfish::UCI::square(leastValuableAttacker);
-        str += " is hanging as it can be SEE-negatively caputred by the " + 
-            attackerPieceStr + " on " + attackerSquareStr + ".";
-    }
-    else
-    {
-        str += " is not hanging.";
-    }
-    return str;
 }
 //-----------------------------------
 

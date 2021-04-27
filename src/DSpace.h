@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include "bitboard.h"
+#include "position.h"
 
 namespace Stockfish {
   class Position;
@@ -13,9 +13,10 @@ namespace Stockfish {
 }
 
 namespace DSpace {
+	Stockfish::Square to_square(std::string sqStr);	
 	void pieceinfo(Stockfish::Position& pos, std::istringstream& is);
-	Stockfish::Square to_square(std::string sqStr);
-}
+	void bestmoves(Stockfish::Position& pos, std::istringstream& is, Stockfish::StateListPtr& states);
+	}
 
 
 #endif // #ifndef DSPACE_H_INCLUDED
