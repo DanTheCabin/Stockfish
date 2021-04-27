@@ -21,15 +21,20 @@ public:
   DPieceInfoProvider(Stockfish::Position& position, Stockfish::Square pieceSquare);
   Stockfish::Position& Position() const;
   Stockfish::Square PieceSquare() const;
+  Stockfish::Piece Piece() const;
+  Stockfish::Color PieceColor() const;
+  std::string PieceSquareName() const;
   std::string PieceName() const;
   std::string PieceNameOn(Stockfish::Square sq) const;
-  std::string PieceSquareString() const;
   std::vector<Stockfish::Square> LegalMoves() const;
   std::string LegalMovesString() const;
   std::vector<Stockfish::Square> CaptureMoves() const;
   std::string CaptureMovesString() const;
   bool IsPinned(Stockfish::Square& by, Stockfish::Square& to) const;
   std::string IsPinnedString() const;
+  Stockfish::Square LeastValuableAttacker() const;
+  bool IsHanging(Stockfish::Square& by) const;
+  std::string IsHangingString() const;
 
 private:
   Stockfish::Position& m_position;

@@ -19,13 +19,7 @@ DPieceInfoProvider::DPieceInfoProvider(Stockfish::Position& position, Stockfish:
 {
     if (m_position.piece_on(m_pieceSquare) == Stockfish::NO_PIECE)
     {
-        throw std::runtime_error("There is no piece on " + this->PieceSquareString());
-    }
-    Stockfish::Color color = Stockfish::color_of(m_position.piece_on(m_pieceSquare));
-    if (color != m_position.side_to_move())
-    {
-        string colorStr = color == Stockfish::WHITE ? "white" : "black"; 
-        throw std::runtime_error("There is a " + colorStr + " piece on " + this->PieceSquareString() + " but it is not " + colorStr + "'s turn to move." );
+        throw std::runtime_error("There is no piece on " + this->PieceSquareName());
     }
 }
 //-----------------------------------
@@ -39,9 +33,19 @@ Stockfish::Square DPieceInfoProvider::PieceSquare() const
     return this->m_pieceSquare;
 }
 //-----------------------------------
-string DPieceInfoProvider::PieceSquareString() const
+string DPieceInfoProvider::PieceSquareName() const
 {
     return Stockfish::UCI::square(this->m_pieceSquare);
+}
+//-----------------------------------
+Stockfish::Color DPieceInfoProvider::PieceColor() const
+{
+    return Stockfish::color_of(this->Piece());
+}
+//-----------------------------------
+Stockfish::Piece DPieceInfoProvider::Piece() const
+{
+    return this->Position().piece_on(this->PieceSquare());
 }
 //-----------------------------------
 string DPieceInfoProvider::PieceNameOn(Stockfish::Square sq) const
@@ -70,19 +74,28 @@ vector<Stockfish::Square> DPieceInfoProvider::LegalMoves() const
 string DPieceInfoProvider::LegalMovesString() const
 {
     string str;
-    vector<Stockfish::Square> moves = LegalMoves();
-    for (auto to : moves)
+    if (this->PieceColor() != this->Position().side_to_move())
     {
-        str += Stockfish::UCI::square(to) + ", ";
-    }
-    str = str.substr(0, str.size()-2); // Remove trailing comma
-    if (str.size())
-    {
-        str = "There are " + to_string(moves.size()) + " legal moves for the " + this->PieceName() + " on " + this->PieceSquareString() + ": " + str + ".";
+        string colorStr = this->PieceColor() == Stockfish::WHITE ? "white" : "black"; 
+        str = "The " + colorStr + " " + this->PieceName() + " on " + this->PieceSquareName() + 
+            " has no legal moves since it is not " + colorStr + "'s turn to move.";
     }
     else
     {
-        str = "There are no legal moves for the " + this->PieceName() + " on " + this->PieceSquareString() + ".";
+        vector<Stockfish::Square> moves = LegalMoves();
+        for (auto to : moves)
+        {
+            str += Stockfish::UCI::square(to) + ", ";
+        }
+        str = str.substr(0, str.size()-2); // Remove trailing comma
+        if (str.size())
+        {
+            str = "There are " + to_string(moves.size()) + " legal move(s) for the " + this->PieceName() + " on " + this->PieceSquareName() + ": " + str + ".";
+        }
+        else
+        {
+            str = "There are no legal moves for the " + this->PieceName() + " on " + this->PieceSquareName() + ".";
+        }
     }
     return str;
 }
@@ -106,19 +119,28 @@ vector<Stockfish::Square> DPieceInfoProvider::CaptureMoves() const
 string DPieceInfoProvider::CaptureMovesString() const
 {
     string str;
-    vector<Stockfish::Square> moves = CaptureMoves();
-    for (auto to : moves)
+    if (this->PieceColor() != this->Position().side_to_move())
     {
-        str += Stockfish::UCI::square(to) + ", ";
-    }
-    str = str.substr(0, str.size()-2); // Remove trailing comma
-    if (str.size())
-    {
-        str = "The " + this->PieceName() + " on " + this->PieceSquareString() + " can make " + to_string(moves.size()) + " capture(s): " + str + ".";
+        string colorStr = this->PieceColor() == Stockfish::WHITE ? "white" : "black"; 
+        str = "The " + colorStr + " " + this->PieceName() + " on " + this->PieceSquareName() + 
+            " has no capture moves since it is not " + colorStr + "'s turn to move.";
     }
     else
     {
-        str = "The " + this->PieceName() + " on " + this->PieceSquareString() + " cannot capture any pieces.";
+        vector<Stockfish::Square> moves = CaptureMoves();
+        for (auto to : moves)
+        {
+            str += Stockfish::UCI::square(to) + ", ";
+        }
+        str = str.substr(0, str.size()-2); // Remove trailing comma
+        if (str.size())
+        {
+            str = "The " + this->PieceName() + " on " + this->PieceSquareName() + " can make " + to_string(moves.size()) + " capture(s): " + str + ".";
+        }
+        else
+        {
+            str = "The " + this->PieceName() + " on " + this->PieceSquareName() + " cannot capture any pieces.";
+        }
     }
     return str;
 }
@@ -186,7 +208,7 @@ bool DPieceInfoProvider::IsPinned(Stockfish::Square& by, Stockfish::Square& to) 
 //-----------------------------------
 string DPieceInfoProvider::IsPinnedString() const
 {
-    string str = "The " + this->PieceName() + " on " + this->PieceSquareString();
+    string str = "The " + this->PieceName() + " on " + this->PieceSquareName();
     Stockfish::Square by = Stockfish::SQ_NONE;
     Stockfish::Square to = Stockfish::SQ_NONE;
     bool isPinned = this->IsPinned(by, to);
@@ -202,6 +224,72 @@ string DPieceInfoProvider::IsPinnedString() const
     else
     {
         str += " is not pinned.";
+    }
+    return str;
+}
+//-----------------------------------
+Stockfish::Square DPieceInfoProvider::LeastValuableAttacker() const
+{
+    Stockfish::Square lva = Stockfish::SQ_NONE;
+    Stockfish::Bitboard attackers = this->Position().attackers_to(this->PieceSquare()) &
+        this->Position().pieces(~this->PieceColor());
+    if (attackers)
+    {
+        Stockfish::Bitboard bb;
+        if ((bb = (attackers & this->Position().pieces(Stockfish::PAWN))))
+        {
+            lva = Stockfish::pop_lsb(bb);
+        }
+        else if ((bb = (attackers & this->Position().pieces(Stockfish::KNIGHT))))
+        {
+            lva = Stockfish::pop_lsb(bb);
+        }
+        else if ((bb = (attackers & this->Position().pieces(Stockfish::BISHOP))))
+        {
+            lva = Stockfish::pop_lsb(bb);
+        }
+        else if ((bb = (attackers & this->Position().pieces(Stockfish::ROOK))))
+        {
+            lva = Stockfish::pop_lsb(bb);
+        }
+        else if ((bb = (attackers & this->Position().pieces(Stockfish::QUEEN))))
+        {
+            lva = Stockfish::pop_lsb(bb);
+        }
+        else
+        {
+            lva = this->Position().square<Stockfish::KING>(~this->PieceColor());
+        }
+    }
+    return lva;
+}
+//-----------------------------------
+bool DPieceInfoProvider::IsHanging(Stockfish::Square& leastValuableAttacker) const
+{
+    bool isHanging = false;
+    leastValuableAttacker = this->LeastValuableAttacker();
+    if (leastValuableAttacker != Stockfish::SQ_NONE)
+    {
+        isHanging = this->Position().see_ge(make_move(leastValuableAttacker, this->PieceSquare()), Stockfish::Value(1));
+    }
+    return isHanging;
+}
+//-----------------------------------
+string DPieceInfoProvider::IsHangingString() const
+{
+    string str = "The " + this->PieceName() + " on " + this->PieceSquareName();
+    Stockfish::Square leastValuableAttacker = Stockfish::SQ_NONE;
+    bool isHanging = this->IsHanging(leastValuableAttacker);
+    if (isHanging)
+    {
+        string attackerPieceStr = this->PieceNameOn(leastValuableAttacker);
+        string attackerSquareStr = Stockfish::UCI::square(leastValuableAttacker);
+        str += " is hanging as it can be SEE-negatively caputred by the " + 
+            attackerPieceStr + " on " + attackerSquareStr + ".";
+    }
+    else
+    {
+        str += " is not hanging.";
     }
     return str;
 }

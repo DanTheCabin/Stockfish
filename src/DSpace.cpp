@@ -22,6 +22,7 @@ void pieceinfo(Stockfish::Position& pos, istringstream& is)
         cout << pieceInfo.LegalMovesString() << endl;
         cout << pieceInfo.CaptureMovesString() << endl;
         cout << pieceInfo.IsPinnedString() << endl;
+        cout << pieceInfo.IsHangingString() << endl;        
     }
     catch (const std::runtime_error& e)
     {
