@@ -175,9 +175,6 @@ bool DPieceInfoProvider::IsPinnedToSquare(Stockfish::Square attackedSq, Stockfis
 bool DPieceInfoProvider::IsPinned(Stockfish::Square& by, Stockfish::Square& to) const
 {
     bool isPinned = false;
-    //Stockfish::Square pinnedSq = this->PieceSquare();
-    //Stockfish::Color pieceColor = color_of(this->Position().piece_on(pinnedSq));
-    //isPinned = pinnedSq & this->Position().blockers_for_king(pieceColor); // Check if pinned to king first, not covered by the below algorithm
     Stockfish::Square sq = Stockfish::SQ_A1;
     while (!isPinned && sq <= Stockfish::SQ_H8)
     {
