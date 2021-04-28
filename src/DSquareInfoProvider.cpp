@@ -39,29 +39,29 @@ Stockfish::Piece DSquareInfoProvider::Piece() const
     return Position().piece_on(Square());
 }
 //-----------------------------------
-vector<Stockfish::Square> DSquareInfoProvider::LegalMoves() const
+vector<Stockfish::Move> DSquareInfoProvider::LegalMoves() const
 {
-    vector<Stockfish::Square> moves;
+    vector<Stockfish::Move> moves;
     for (const auto& m : Stockfish::MoveList<Stockfish::LEGAL>(Position()))
     {
         if (Stockfish::from_sq(m) == Square())
         {
-            moves.push_back(Stockfish::to_sq(m));
+            moves.push_back(m);
         }
     }
     return moves;
 }
 //-----------------------------------
-vector<Stockfish::Square> DSquareInfoProvider::CaptureMoves() const
+vector<Stockfish::Move> DSquareInfoProvider::CaptureMoves() const
 {
-    vector<Stockfish::Square> moves;
+    vector<Stockfish::Move> moves;
     for (const auto& m : Stockfish::MoveList<Stockfish::CAPTURES>(Position()))
     {
         if (Stockfish::from_sq(m) == Square())
         {
             if (Position().legal(m)) // Need to make sure we're not moving out of a king pin or that our king is already in check
             {
-                moves.push_back(Stockfish::to_sq(m));
+                moves.push_back(m);
             }
         }
     }

@@ -31,7 +31,7 @@
 #include "tt.h"
 #include "uci.h"
 #include "syzygy/tbprobe.h"
-#include "DSpace.h"
+#include "DUci.h"
 
 
 using namespace std;

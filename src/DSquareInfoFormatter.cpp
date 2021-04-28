@@ -1,6 +1,7 @@
 #include <iostream>
 #include "DSquareInfoProvider.h"
 #include "DSquareInfoFormatter.h"
+#include "DUtil.h"
 #include "position.h"
 #include "bitboard.h"
 #include "movegen.h"
@@ -11,8 +12,6 @@
 using namespace std;
 
 namespace DSpace {
-
-const string pieceNames[7] = {"", "pawn", "knight", "bishop", "rook", "queen", "king"};
 
 //-----------------------------------
 DSquareInfoFormatter::DSquareInfoFormatter(DSquareInfoProvider& provider)
@@ -37,7 +36,7 @@ string DSquareInfoFormatter::SquareName() const
 //-----------------------------------
 string DSquareInfoFormatter::PieceNameOn(Stockfish::Square sq) const
 {
-    return pieceNames[type_of(Position().piece_on(sq))];
+    return Util::piece_name_on(Position(), sq);
 }
 //-----------------------------------
 string DSquareInfoFormatter::PieceName() const
@@ -60,10 +59,10 @@ string DSquareInfoFormatter::LegalMovesString() const
     }
     else
     {
-        vector<Stockfish::Square> moves = Provider().LegalMoves();
-        for (auto to : moves)
+        vector<Stockfish::Move> moves = Provider().LegalMoves();
+        for (auto m : moves)
         {
-            str += Stockfish::UCI::square(to) + ", ";
+            str += Stockfish::UCI::move(m, false) + ", ";
         }
         str = str.substr(0, str.size()-2); // Remove trailing comma
         if (str.size())
@@ -88,10 +87,10 @@ string DSquareInfoFormatter::CaptureMovesString() const
     }
     else
     {
-        vector<Stockfish::Square> moves = Provider().CaptureMoves();
-        for (auto to : moves)
+        vector<Stockfish::Move> moves = Provider().CaptureMoves();
+        for (auto m : moves)
         {
-            str += Stockfish::UCI::square(to) + ", ";
+            str += Stockfish::UCI::move(m, false) + ", ";
         }
         str = str.substr(0, str.size()-2); // Remove trailing comma
         if (str.size())

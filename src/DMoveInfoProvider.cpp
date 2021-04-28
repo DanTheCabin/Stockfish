@@ -1,6 +1,7 @@
 #include <iostream>
 #include "DMoveInfoProvider.h"
 #include "DSquareInfoProvider.h"
+#include "DUtil.h"
 #include "position.h"
 #include "search.h"
 #include "bitboard.h"
@@ -19,10 +20,9 @@ namespace DSpace {
 DMoveInfoProvider::DMoveInfoProvider(
     Stockfish::Position& position, 
     Stockfish::Move move, 
-    Stockfish::StateListPtr& states, 
-    DSquareInfoProvider& toProvider
+    Stockfish::StateListPtr& states
     )
-    : m_position(position), m_move(move), m_states(states), m_toProvider(toProvider)
+    : m_position(position), m_move(move), m_states(states)
 {
 }
 //-----------------------------------
@@ -41,11 +41,6 @@ Stockfish::StateListPtr& DMoveInfoProvider::States() const
     return m_states;
 }
 //-----------------------------------
-DSquareInfoProvider DMoveInfoProvider::ToSquare() const
-{
-    return m_toProvider;
-}
-//-----------------------------------
 bool DMoveInfoProvider::IsCapture() const
 {
     /* No need to check if the piece on the destination square is of opposite color
@@ -60,9 +55,9 @@ bool DMoveInfoProvider::IsSEEPositiveCapture() const
 //-----------------------------------
 double DMoveInfoProvider::CentipawnChange() const
 {
-    Stockfish::StateInfo st;
+    States()->emplace_back();
     Stockfish::Value before = Stockfish::Eval::evaluate(Position());
-    Position().do_move(Move(), st);
+    Position().do_move(Move(), States()->back());
     Stockfish::Value after = Stockfish::Eval::evaluate(Position());
     Position().undo_move(Move());
     return -(double(after) * 100 / Stockfish::PawnValueEg) + (double(before) * 100 / Stockfish::PawnValueEg); // Sign on the eval value changes depending on side to move
@@ -70,7 +65,22 @@ double DMoveInfoProvider::CentipawnChange() const
 //-----------------------------------
 bool DMoveInfoProvider::CapturesHangingPiece() const
 {
-    return IsCapture() && ToSquare().IsHanging();
+    bool isHanging = DSquareInfoProvider(Position(), Stockfish::to_sq(Move())).IsHanging();
+    return IsCapture() && isHanging;
 }
-
+//------------------------------------
+vector<Stockfish::Move> DMoveInfoProvider::AllSEEPositiveCaptures() const
+{
+    return Util::all_see_positive_captures(Position());
+}
+//------------------------------------
+vector<Stockfish::Move> DMoveInfoProvider::SEEPositiveCapturesAfterMove() const
+{
+    States()->emplace_back();
+    Position().do_move(Move(), States()->back());
+    vector<Stockfish::Move> seePositiveCaptures = AllSEEPositiveCaptures();
+    Position().undo_move(Move());
+    return seePositiveCaptures;
+}
+//-------------------------------------
 } // namespace DSpace

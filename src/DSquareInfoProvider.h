@@ -23,8 +23,8 @@ public:
   Stockfish::Square Square() const;
   Stockfish::Piece Piece() const;
   Stockfish::Color PieceColor() const;
-  std::vector<Stockfish::Square> LegalMoves() const;
-  std::vector<Stockfish::Square> CaptureMoves() const;
+  std::vector<Stockfish::Move> LegalMoves() const;
+  std::vector<Stockfish::Move> CaptureMoves() const;
   bool IsPinned(Stockfish::Square& by, Stockfish::Square& to) const;
   Stockfish::Square LeastValuableAttacker() const;
   bool IsHanging() const;

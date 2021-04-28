@@ -1,5 +1,6 @@
 #include <iostream>
-#include "DSpace.h"
+#include "DUci.h"
+#include "DUtil.h"
 #include "DSquareInfoProvider.h"
 #include "DSquareInfoFormatter.h"
 #include "DPositionInfoProvider.h"
@@ -43,7 +44,7 @@ void pieceinfo(Stockfish::Position& pos, istringstream& is)
 {
     string token;
     is >> token;
-    Stockfish::Square square = to_square(token);
+    Stockfish::Square square = Util::to_square(token);
     if (pos.piece_on(square) != Stockfish::NO_PIECE)
     {
         DSquareInfoProvider provider = DSquareInfoProvider(pos, square);
@@ -68,12 +69,12 @@ void moveinfo(Stockfish::Position& pos, istringstream& is, Stockfish::StateListP
     Stockfish::Move move = Stockfish::UCI::to_move(pos, token);
     if (move != Stockfish::MOVE_NONE)
     {
-        DSquareInfoProvider toSquareProvider = DSquareInfoProvider(pos, Stockfish::to_sq(move));
-        DMoveInfoProvider provider = DMoveInfoProvider(pos, move, states, toSquareProvider);
+        DMoveInfoProvider provider = DMoveInfoProvider(pos, move, states);
         DMoveInfoFormatter moveInfo = DMoveInfoFormatter(provider);
-        cout << moveInfo.CentipawnChangeString() << endl;
         cout << moveInfo.IsSEEPositiveCaptureString() << endl;
         cout << moveInfo.CapturesHangingPieceString() << endl;
+        cout << moveInfo.SEEPositiveCapturesAfterMoveString() << endl;
+        cout << moveInfo.CentipawnChangeString() << endl;
     }
     else
     {
@@ -81,22 +82,7 @@ void moveinfo(Stockfish::Position& pos, istringstream& is, Stockfish::StateListP
     }
 }
 //-----------------------------------
-// Square to_square(string): Helper function that would actually belong in uci.cpp where "to_move" is a related function, but I put it here for separation
-//-----------------------------------
-Stockfish::Square to_square(string sqStr)
-{
-    Stockfish::Square sq = Stockfish::SQ_NONE;
-    for (Stockfish::Square sqi = Stockfish::SQ_A1; sqi <= Stockfish::SQ_H8; ++sqi)
-    {
-        if (sqStr == Stockfish::UCI::square(sqi))
-        {
-            sq = sqi;
-            break;
-        }
-    }
-    return sq;
-}
-//-----------------------------------
+
 /// 
 
 }

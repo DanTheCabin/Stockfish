@@ -6,6 +6,7 @@
 #include "position.h"
 #include "types.h"
 #include <vector>
+#include <iostream>
 
 
 namespace Stockfish {
@@ -21,9 +22,12 @@ public:
   DMoveInfoFormatter(DMoveInfoProvider& provider);
   DMoveInfoProvider& Provider() const;
   std::string MoveName() const;
+  std::string PieceName(Stockfish::Square sq) const;
+  std::string SquareName(Stockfish::Square sq) const;
   std::string IsSEEPositiveCaptureString() const;
   std::string CentipawnChangeString() const;
   std::string CapturesHangingPieceString() const;
+  std::string SEEPositiveCapturesAfterMoveString() const;
   
 private:
   DMoveInfoProvider& m_provider;

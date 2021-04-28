@@ -23,24 +23,23 @@ public:
   DMoveInfoProvider(
   	Stockfish::Position& position, 
   	Stockfish::Move move, 
-  	Stockfish::StateListPtr& states,
-  	DSquareInfoProvider& toProvider
+  	Stockfish::StateListPtr& states
   );
   Stockfish::Position& Position() const;
   Stockfish::Move Move() const;
   Stockfish::StateListPtr& States() const;
-  DSquareInfoProvider ToSquare() const;
   double CentipawnChange() const;
   bool IsCapture() const;
   bool IsSEEPositiveCapture() const;
   bool CapturesHangingPiece() const;
+  std::vector<Stockfish::Move> AllSEEPositiveCaptures() const;
+  std::vector<Stockfish::Move> SEEPositiveCapturesAfterMove() const;
+
   
 private:
   Stockfish::Position& m_position;
   Stockfish::Move m_move;
   Stockfish::StateListPtr& m_states;
-  DSquareInfoProvider& m_toProvider;
-
 };
 
 } // namespace DSpace

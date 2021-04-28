@@ -1,6 +1,7 @@
 #include <iostream>
 #include "DMoveInfoProvider.h"
 #include "DMoveInfoFormatter.h"
+#include "DUtil.h"
 #include "position.h"
 #include "search.h"
 #include "bitboard.h"
@@ -31,6 +32,16 @@ string DMoveInfoFormatter::MoveName() const
     return Stockfish::UCI::move(Provider().Move(), false);
 }
 //-----------------------------------
+string DMoveInfoFormatter::PieceName(Stockfish::Square sq) const
+{
+    return Util::piece_name_on(Provider().Position(), sq);
+}
+//-----------------------------------
+string DMoveInfoFormatter::SquareName(Stockfish::Square sq) const
+{
+    return Stockfish::UCI::square(sq);
+}
+//-----------------------------------
 string DMoveInfoFormatter::IsSEEPositiveCaptureString() const
 {
     string str = "The move is";
@@ -47,8 +58,8 @@ string DMoveInfoFormatter::CentipawnChangeString() const
 {
     double cpChange = Provider().CentipawnChange();
     string direction = cpChange > 0 ? " wins " : " loses ";
-    string str = "The move " + direction +
-        to_string(cpChange) + " centipawns.";
+    string str = "(Likely incorrect) The move supposedly" + direction +
+        to_string(abs(cpChange)) + " centipawns.";
     return str;
 }
 //-----------------------------------
@@ -57,13 +68,37 @@ string DMoveInfoFormatter::CapturesHangingPieceString() const
     string str = "The move ";
     if (Provider().CapturesHangingPiece())
     {
-        str += " captures a hanging piece (it may have defenders, but the SEE will be positive).";
+        str += "captures a hanging " + PieceName(Stockfish::to_sq(Provider().Move())) + " (it may have defenders, but the SEE will be positive).";
     }
     else
     {
-        str += " does not capture a hanging piece.";
+        str += "does not capture a hanging piece.";
     }
     return str;
 }
+//-----------------------------------
+string DMoveInfoFormatter::SEEPositiveCapturesAfterMoveString() const
+{
+    ostringstream str;
+    str << "The move allows ";
+    vector<Stockfish::Move> captures = Provider().SEEPositiveCapturesAfterMove();
+    Provider().States()->emplace_back();
+    Provider().Position().do_move(Provider().Move(), Provider().States()->back());
+    if (captures.size())
+    {
+        str << captures.size() << " SEE-positive capture moves:";
+        for (auto& m : captures)
+        {
+            str << endl << "\t The " << PieceName(Stockfish::from_sq(m)) << " on " << SquareName(Stockfish::from_sq(m)) 
+            << " captures the " << PieceName(Stockfish::to_sq(m)) << " on " << SquareName(Stockfish::to_sq(m)) << ".";
+        }
 
+    }
+    else
+    {
+        str << "no SEE-positive capture moves.";
+    }
+    Provider().Position().undo_move(Provider().Move());
+    return str.str();
+}
 } // namespace DSpace

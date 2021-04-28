@@ -40,7 +40,7 @@ endif
 ### Source and object files
 SRCS = benchmark.cpp bitbase.cpp bitboard.cpp endgame.cpp evaluate.cpp \
 	DSquareInfoProvider.cpp DSquareInfoFormatter.cpp DPositionInfoProvider.cpp DPositionInfoFormatter.cpp \
-	DMoveInfoProvider.cpp DMoveInfoFormatter.cpp DSpace.cpp main.cpp \
+	DMoveInfoProvider.cpp DMoveInfoFormatter.cpp DUtil.cpp DUci.cpp main.cpp \
 	material.cpp misc.cpp movegen.cpp movepick.cpp pawns.cpp position.cpp psqt.cpp \
 	search.cpp thread.cpp timeman.cpp tt.cpp uci.cpp ucioption.cpp tune.cpp syzygy/tbprobe.cpp \
 	nnue/evaluate_nnue.cpp nnue/features/half_kp.cpp
