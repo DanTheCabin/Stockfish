@@ -1,7 +1,7 @@
 
 Build using the MakeFile in src/.
 
-Launch the binary and enter a position at the command line (example: position fen r3k2r/1pp3p1/p3pn1p/8/1N3N2/P4BP1/1P1K1P1P/7R b kq - 0 18)
+Launch the binary.and enter a position at the command line (example: position fen r3k2r/1pp3p1/p3pn1p/8/1N3N2/P4BP1/1P1K1P1P/7R b kq - 0 18)
 
 Then use any of these three new "uci" commands:
 
@@ -22,6 +22,21 @@ moveinfo [move] (example: moveinfo e2e3)
 
 bestmoves [N] (example: bestmoves 5)
 	gives the N best moves (note: does spam the log while searching, not the most beautiful solution, but seemingly works!).
+
+
+Example case:
+
+position fen position fen rn1qkb2/pppbpp1r/5np1/1N1p3p/B2P1N2/4PQ2/PPP2PPP/R1B1K2R b KQq - 11 12
+moveinfo h5h4
+	The move is not a SEE-positive capture.
+	The move does not capture a hanging piece.
+	The move allows 1 SEE-positive capture moves:
+    The knight on f4 captures the pawn on d5.
+pieceinfo d5
+	There are no legal moves for the pawn on d5.
+	The pawn on d5 cannot capture any pieces.
+	The pawn on d5 is pinned to the pawn on b7 by the queen on f3.
+	The pawn on d5 is hanging as it can be SEE-negatively caputred by the knight on f4.
 
 
 Comments:
