@@ -1,13 +1,13 @@
 #include <iostream>
 #include "DPositionInfoProvider.h"
 #include "DPositionInfoFormatter.h"
+#include "DUtil.h"
 #include "position.h"
 #include "search.h"
 #include "bitboard.h"
 #include "movegen.h"
 #include "types.h"
 #include "thread.h"
-#include "uci.h"
 #include <vector>
 
 using namespace std;
@@ -33,7 +33,7 @@ string DPositionInfoFormatter::BestMovesString(int numberOfMoves)
     for (size_t i=0; i < bestmoves.size(); ++i)
     {
         Stockfish::Move m = bestmoves[i];
-        str += " " + to_string(i+1) + ". " + Stockfish::UCI::move(m, false);
+        str += " " + to_string(i+1) + ". " + Util::from_move(m);
     }
     return str;
 }

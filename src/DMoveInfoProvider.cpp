@@ -8,7 +8,6 @@
 #include "movegen.h"
 #include "types.h"
 #include "thread.h"
-#include "uci.h"
 #include <vector>
 
 using namespace std;

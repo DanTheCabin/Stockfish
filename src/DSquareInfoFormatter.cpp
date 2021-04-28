@@ -6,7 +6,6 @@
 #include "bitboard.h"
 #include "movegen.h"
 #include "types.h"
-#include "uci.h"
 #include <vector>
 
 using namespace std;
@@ -31,7 +30,7 @@ Stockfish::Position& DSquareInfoFormatter::Position() const
 //-----------------------------------
 string DSquareInfoFormatter::SquareName() const
 {
-    return Stockfish::UCI::square(Provider().Square());
+    return Util::square(Provider().Square());
 }
 //-----------------------------------
 string DSquareInfoFormatter::PieceNameOn(Stockfish::Square sq) const
@@ -62,7 +61,7 @@ string DSquareInfoFormatter::LegalMovesString() const
         vector<Stockfish::Move> moves = Provider().LegalMoves();
         for (auto m : moves)
         {
-            str += Stockfish::UCI::move(m, false) + ", ";
+            str += Util::from_move(m) + ", ";
         }
         str = str.substr(0, str.size()-2); // Remove trailing comma
         if (str.size())
@@ -90,7 +89,7 @@ string DSquareInfoFormatter::CaptureMovesString() const
         vector<Stockfish::Move> moves = Provider().CaptureMoves();
         for (auto m : moves)
         {
-            str += Stockfish::UCI::move(m, false) + ", ";
+            str += Util::from_move(m) + ", ";
         }
         str = str.substr(0, str.size()-2); // Remove trailing comma
         if (str.size())
@@ -115,8 +114,8 @@ string DSquareInfoFormatter::IsPinnedString() const
     {
         string toPieceStr = PieceNameOn(to);
         string byPieceStr = PieceNameOn(by);
-        string toSquareStr = Stockfish::UCI::square(to);
-        string bySquareStr = Stockfish::UCI::square(by);
+        string toSquareStr = Util::square(to);
+        string bySquareStr = Util::square(by);
         str += " is pinned to the " + 
             toPieceStr + " on " + toSquareStr + " by the " + byPieceStr + " on " + bySquareStr + ".";
     }
@@ -136,7 +135,7 @@ string DSquareInfoFormatter::IsHangingString() const
     {
         Stockfish::Square leastValuableAttacker = Provider().LeastValuableAttacker();
         string attackerPieceStr = PieceNameOn(leastValuableAttacker);
-        string attackerSquareStr = Stockfish::UCI::square(leastValuableAttacker);
+        string attackerSquareStr = Util::square(leastValuableAttacker);
         str += " is hanging as it can be SEE-negatively caputred by the " + 
             attackerPieceStr + " on " + attackerSquareStr + ".";
     }

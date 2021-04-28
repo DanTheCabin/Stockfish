@@ -4,7 +4,6 @@
 #include "bitboard.h"
 #include "movegen.h"
 #include "types.h"
-#include "uci.h"
 #include <vector>
 
 using namespace std;

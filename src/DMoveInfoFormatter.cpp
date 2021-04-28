@@ -8,7 +8,6 @@
 #include "movegen.h"
 #include "types.h"
 #include "thread.h"
-#include "uci.h"
 #include <vector>
 
 using namespace std;
@@ -29,7 +28,7 @@ DMoveInfoProvider& DMoveInfoFormatter::Provider() const
 //-----------------------------------
 string DMoveInfoFormatter::MoveName() const
 {
-    return Stockfish::UCI::move(Provider().Move(), false);
+    return Util::from_move(Provider().Move());
 }
 //-----------------------------------
 string DMoveInfoFormatter::PieceName(Stockfish::Square sq) const
@@ -39,7 +38,7 @@ string DMoveInfoFormatter::PieceName(Stockfish::Square sq) const
 //-----------------------------------
 string DMoveInfoFormatter::SquareName(Stockfish::Square sq) const
 {
-    return Stockfish::UCI::square(sq);
+    return Util::square(sq);
 }
 //-----------------------------------
 string DMoveInfoFormatter::IsSEEPositiveCaptureString() const
@@ -58,8 +57,8 @@ string DMoveInfoFormatter::CentipawnChangeString() const
 {
     double cpChange = Provider().CentipawnChange();
     string direction = cpChange > 0 ? " wins " : " loses ";
-    string str = "(Likely incorrect) The move supposedly" + direction +
-        to_string(abs(cpChange)) + " centipawns.";
+    string str = "(Incorrect? I have questions about this) The move supposedly" + direction +
+        to_string(abs(cpChange)) + " centipawns (static evaluation).";
     return str;
 }
 //-----------------------------------
