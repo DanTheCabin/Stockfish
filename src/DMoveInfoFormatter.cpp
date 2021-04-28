@@ -57,7 +57,7 @@ string DMoveInfoFormatter::CentipawnChangeString() const
 {
     double cpChange = Provider().CentipawnChange();
     string direction = cpChange > 0 ? " wins " : " loses ";
-    string str = "(Incorrect? I have questions about this) The move supposedly" + direction +
+    string str = "(Questionable) The move supposedly" + direction +
         to_string(abs(cpChange)) + " centipawns (static evaluation).";
     return str;
 }
@@ -91,7 +91,6 @@ string DMoveInfoFormatter::SEEPositiveCapturesAfterMoveString() const
             str << endl << "\t The " << PieceName(Stockfish::from_sq(m)) << " on " << SquareName(Stockfish::from_sq(m)) 
             << " captures the " << PieceName(Stockfish::to_sq(m)) << " on " << SquareName(Stockfish::to_sq(m)) << ".";
         }
-
     }
     else
     {

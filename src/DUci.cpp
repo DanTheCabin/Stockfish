@@ -24,7 +24,7 @@ void bestmoves(Stockfish::Position& pos, istringstream& is, Stockfish::StateList
     string numberOfMovesStr;
     int numberOfMoves;
     is >> numberOfMovesStr;
-    
+    string fen = pos.fen();
     try
     {
         numberOfMoves = std::stoi(numberOfMovesStr);
@@ -38,6 +38,10 @@ void bestmoves(Stockfish::Position& pos, istringstream& is, Stockfish::StateList
     DPositionInfoProvider provider = DPositionInfoProvider(pos, states);
     DPositionInfoFormatter positionInfo = DPositionInfoFormatter(provider);
     cout << positionInfo.BestMovesString(numberOfMoves) << endl;
+
+    // Restore state
+    states = Stockfish::StateListPtr(new std::deque<Stockfish::StateInfo>(1)); // Drop old and create a new one
+    pos.set(fen, Stockfish::Options["UCI_Chess960"], &states->back(), Stockfish::Threads.main());
 }
 //-----------------------------------
 void pieceinfo(Stockfish::Position& pos, istringstream& is)
